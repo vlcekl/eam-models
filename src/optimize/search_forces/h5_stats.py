@@ -14,7 +14,6 @@ import re
 import numpy as np
 import h5py
 import pickle
-from itertools import product
 
 # pair distances
 def pair_dist(xyz, box):
@@ -44,41 +43,6 @@ def pair_dist(xyz, box):
             rr[i,j] = np.sum(dp*dp)**0.5
             rx[i,j] = dp
         
-    return rr, rx
-
-def pair_dist_minibox(xyz, box):
-    """
-    Calculates nearest image pair distances between all atoms in xyz array.
-    Parameters
-    -----------
-    xyz : numpy array
-          particle x, y, z coordinates
-    box : scalar or numpy array
-          simulation box dimensions/shape
-    Returns
-    -------
-    rr  : (natom, natom) numpy array of pair distances
-    rx  : (natom, natom, 3) numpy array of pair distance coordinates
-    """
-
-    # create box replicas in all directions
-    for ib1, ib2, ib3 in product([-1, 0, 1], repeat=3):
-        print('ib', ib1, ib2, ib3)
-
-    n_atom = xyz.shape[0] # number of atoms in a configuration
-    rr = np.empty((n_atom, n_atom), dtype=float)
-    rx = np.empty((n_atom, n_atom, 3), dtype=float)
-
-    for i, pa in enumerate(xyz):
-        for j, pb in enumerate(xyz):
-            dp = pa - pb
-            dp = np.where(dp < -0.5*box, dp + box, dp)
-            dp = np.where(dp >  0.5*box, dp - box, dp)
-            rr[i,j] = np.sum(dp*dp)**0.5
-            rx[i,j] = dp
-        
-    #rr = np.array(rr)
-    #rx = np.array(rx)
     return rr, rx
 
 # sufficient statistics for EAM
@@ -127,7 +91,7 @@ def get_stats_EAM(rr, rx, sc):
         for i in range(n_atom):
             
             # sum electronic density over all neighbors of i within rc
-            aa[i] = sum([(rc - r)**3 for r in rr[i] if (r < rc and r > 0.01)])
+            aa[i] = sum([(rc - r)**3 for r in rr[i] if r < rc])
 
             # if el. density larger than zero, calculate force statistics
             if aa[i] > 0.0:
@@ -161,78 +125,69 @@ if __name__ == "__main__":
 
     # processed data directory
     target_proc = '../../../data/target_processed'
-    working = '../../../data/working'
 
     # Static parameters of the EAM potential: set of spline nodes
     sc = [2.56, 2.73, 3.252, 3.804, 4.20, 4.77]
 
-    files = ['structs_0k', 'liq_4000k', 'bcc_300k']#, 'german_dft.h5']
-    weights = [100.0, 1.0, 1.0]
+    #files = ['marini_dft.h5', 'german_dft.h5', 'md_t300K.h5']
+    #files = ['marini_dft.h5', 'w_structures_0k.h5']#, 'german_dft.h5']
+    files = ['liq_5000k', 'bcc_300k', 'structs_0k']#, 'german_dft.h5']
+    weights = [1.0, 1.0, 1.0]
     
     # Dictionary of statistics and target data to be used in optimization
-    stats_data = {}
-    target_data = {}
+    stats_data = target_data = {}
 
     # cycle over trajectory data and save target and statistics information
     for di, (filin, weight) in enumerate(zip(files, weights)):
 
         # Create a target dataset directory with exhaustive target information
         target_dict = {'type':'trajectory', 'weight':weight}
+        #with h5py.File(os.path.join(target_proc, filin), "r") as fi:
         with open(os.path.join(target_proc, filin+'.pickle'), 'rb') as fi:
-            # read pickled trajectory dictionary
             traj_dict = pickle.load(fi)
 
-        # save trajectory data
-        target_dict['box'] = traj_dict['box']
-        target_dict['xyz'] = traj_dict['xyz']
-        target_dict['energy'] = traj_dict['energy']
-        target_dict['temp'] = traj_dict['temp']
+            # save trajectory data
+            target_dict['box'] = traj_dict['box']
+            target_dict['xyz'] = traj_dict['xyz']
+            target_dict['energy'] = traj_dict['energy']
 
-        # read and transform forces into (6N+1) arrays
-        if 'forces' in traj_dict.keys():
-            target_dict['forces'] = force_targ(traj_dict['forces'])
+            # read and transform forces into (6N+1) arrays
+            if 'forces' in traj_dict.keys():
+                target_dict['forces'] = force_targ(traj_dict['forces'])
 
-        # save inverse temperature data (if T=0, set beta=1/300)
-        target_dict['beta'] = np.empty_like(target_dict['temp'])
-        for i, temp in enumerate(target_dict['temp']):
+            # save inverse temperature data (if T=0, set beta=1/300)
+            temp = fi.attrs['temperature (K)']
             if temp == 0.0:
-                target_dict['beta'][i] = 1.0/300.0
+                beta = 1.0/300.0
             else:
-                target_dict['beta'][i] = 1.0/temp
+                beta = 1.0/temp
 
-        print(di, 'ene', target_dict['energy'])
+            target_dict['beta'] = beta*np.ones((target_dict['energy'].shape[0]), dtype=float)
+
 
         # Collect energy and force statistics from reference configurations
         stats_dict = {'energy':[], 'forces':[]}
         for xyz, box in zip(target_dict['xyz'], target_dict['box']):
 
             # calculate pair distance matrices (absalute values, components)
-            if 0.5*box > sc[-1]:
-                rr, rx = pair_dist(xyz, box)
-            else:
-                print('box', 0.5*box, sc[-1])
-                rr, rx = pair_dist_minibox(xyz, box)
-
-            print('mindist', np.where(rr > 0.0, rr, 10000.0).min())
+            rr, rx = pair_dist(xyz, box)
 
             # calculate sufficient statistics for energies and forces from pair distances
             a1, ar, a2, f1, fr, f2 = get_stats_EAM(rr, rx, sc)
             print(xyz.shape, box)
-            #print(xyz)
+            print(xyz)
             print('x', a1.shape, rr.shape, np.sum(np.abs(a1)))
 
-            stats_dict['energy'].append(np.array([ar, a2, a1]))
-            stats_dict['forces'].append(np.array([fr, f2, f1]))
-            #print(stats_dict['energy'][-1])
+            stats_dict['energy'].append(np.array([a1, ar, a2]))
+            stats_dict['forces'].append(np.array([f1, fr, f2]))
 
         # add dataset
         stats_data['dset'+str(di)] = stats_dict
         target_data['dset'+str(di)] = target_dict
 
     # pickle stats and target data to be used for optimization
-    with open('../../../data/working/target.pickle', 'wb') as fo:
+    with open('target.pickle', 'wb') as fo:
         pickle.dump(target_data, fo)
 
-    with open('../../../data/working/stats.pickle', 'wb') as fo:
+    with open('stats.pickle', 'wb') as fo:
         pickle.dump(stats_data, fo)
-
