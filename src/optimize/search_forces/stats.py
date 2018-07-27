@@ -15,6 +15,7 @@ import numpy as np
 import h5py
 import pickle
 from itertools import product
+import matplotlib.pyplot as plt
 
 # pair distances
 def pair_dist(xyz, box):
@@ -167,7 +168,7 @@ if __name__ == "__main__":
     sc = [2.56, 2.73, 3.252, 3.804, 4.20, 4.77]
 
     files = ['structs_0k', 'liq_4000k', 'bcc_300k']#, 'german_dft.h5']
-    weights = [100.0, 1.0, 1.0]
+    weights = [10.0, 1.0, 1.0]
     
     # Dictionary of statistics and target data to be used in optimization
     stats_data = {}
