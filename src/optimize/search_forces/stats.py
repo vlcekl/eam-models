@@ -87,7 +87,7 @@ def get_stats_EAM(rr, rx, sc):
     """
     Takes atom pair distances and calculates sufficeint statistics needed
     for the parameterization of a cubic spline-based EAM model by Bonny et al. (2017).
-    
+ 
     Parameters
     ----------
     rr : numpy array
@@ -96,7 +96,7 @@ def get_stats_EAM(rr, rx, sc):
          set of pair distance coordinates
     sc : python list
          spline nodes
-         
+
     Returns
     -------
     ar, a1, a2 : numpy arrays (len(sc))
@@ -106,7 +106,7 @@ def get_stats_EAM(rr, rx, sc):
                  atom force-related statistics (gradients of energy)
                  grad(el_density**0.5), grad(el_density), grad(el_density**2)
     """
-    
+ 
     n_atom = rr.shape[0]
     
     # energy-related statistics
@@ -123,19 +123,19 @@ def get_stats_EAM(rr, rx, sc):
 
     # cycle over spline nodes
     for ks, rc in enumerate(sc):
-        
+
         # cycle over atoms
         for i in range(n_atom):
-            
+
             # sum electronic density over all neighbors of i within rc
             aa[i] = sum([(rc - r)**3 for r in rr[i] if (r < rc and r > 0.01)])
 
             # if el. density larger than zero, calculate force statistics
             if aa[i] > 0.0:
-                
+
                 # precompute a list of recurring values for force statistics
                 ff = [1.5*(rc - r)**2*x/r if (r > 0.01 and r < rc) else zero3 for r, x in zip(rr[i], rx[i])]
-                
+
                 # sum contributions to force statistics from all neighbors of i
                 b1[ks, i] = sum([2*f       for f in ff])
                 br[ks, i] = sum([ -f/np.sqrt(aa[i]) for f in ff])
@@ -145,7 +145,7 @@ def get_stats_EAM(rr, rx, sc):
         ar[ks] = np.sum(np.sqrt(aa))
         a1[ks] = np.sum(aa)
         a2[ks] = np.sum(aa**2)
-        
+
     return a1, ar, a2, b1, br, b2
 
 def force_targ(forces):
