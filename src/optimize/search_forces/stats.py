@@ -167,8 +167,19 @@ if __name__ == "__main__":
     # Static parameters of the EAM potential: set of spline nodes
     sc = [2.56, 2.73, 3.252, 3.804, 4.20, 4.77]
 
-    files = ['structs_0k', 'liq_4000k', 'bcc_300k']#, 'german_dft.h5']
-    weights = [10.0, 1.0, 1.0]
+    files = ['structs_0k',
+            'bcc_npt_langevin_300K',
+            'fcc_npt_langevin_300K',
+            'vac_npt_langevin_2000K',
+            'i110_npt_langevin_2000K',
+            'i111_npt_langevin_2000K',
+            'screw_111_npt_langevin_2000K',
+            'bcc_npt_langevin_3700K',
+            'liq_3700K',
+            'liq_5000K']
+
+    weights = [1.0 for _ in range(len(files))]
+    weights[0] = 10.0
     
     # Dictionary of statistics and target data to be used in optimization
     stats_data = {}
