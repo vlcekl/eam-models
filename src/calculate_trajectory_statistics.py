@@ -17,9 +17,8 @@ import multiprocessing as mp
 
 # statmech library setup
 sys.path.append('../../statmechlib')
-from statmechlib.read_write import read_vasp
-from statmechlib.preprocessing import Trajectory, select_nodes, scale_configuration
-from statmechlib.preprocessing import pair_dist, force_targ, get_stats_EAM_per_atom, get_stats_EAM_per_box
+from statmechlib.preprocessing import Trajectory
+from statmechlib.preprocessing import force_targ, get_stats_EAM_per_atom
 
 
 # Define locations of relevant datasets
