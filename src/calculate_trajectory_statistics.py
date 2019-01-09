@@ -69,7 +69,7 @@ for key, trj in trj_fit.items():
 
 # save target data
 with open(os.path.join(working, "target_samples.pickle"), 'wb') as fo:
-    pickle.dump(target_data, fo)
+    pickle.dump(target_data, fo, protocol=2)
 
 
 #sc = [2.4, 2.45, 2.5, 2.65, 2.70, 2.72, 2.73, 2.74, 2.75, 2.77, 2.80, 2.85, 2.90,
@@ -112,5 +112,5 @@ pool.close()
 pool.join()
 
 with open(os.path.join(working, "stats_samples.pickle"), 'wb') as fo:
-    pickle.dump(stats_data, fo)
+    pickle.dump(stats_data, fo, protocol=2)
 
