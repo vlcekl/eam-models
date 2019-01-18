@@ -62,6 +62,23 @@ C Some tests for the pure species before transformation
       write(*,*)'EQUILIBRIUM DENSITY = ',dens0
       write(*,*)'ENERGY              = ',E0
 C Write Spline coefficents for Yuri Osetsky's code
+      open(unit=10,file='WRe.eam.alloy')
+      write(10,*)'Source: To be submitted.'
+      write(10,*)'Contact information: gbonny@sckcen.be'
+      write(10,*)'June 2016'
+      write(10,*)'2 W Re'
+      write(10,*)Npoints,drho,Npoints,dr,rmax
+      write(10,*)NFe,amFe,alattFe,' bcc'
+      write(10,200)(demb(rhomin+dble(i-1)*drho,1),i=1,Npoints)
+      write(10,200)(elepot(dble(i-1)*dr,1),i=1,Npoints)
+      write(10,*)NNi,amNi,alattNi,' hcp'
+      write(10,200)(demb(rhomin+dble(i-1)*drho,2),i=1,Npoints)
+      write(10,200)(elepot(dble(i-1)*dr,2),i=1,Npoints)
+
+      write(10,200)(dble(i-1)*dr*vpair(dble(i-1)*dr,1,1),i=1,Npoints)
+      write(10,200)(dble(i-1)*dr*vpair(dble(i-1)*dr,1,2),i=1,Npoints)
+      write(10,200)(dble(i-1)*dr*vpair(dble(i-1)*dr,2,2),i=1,Npoints)
+      close(10)
 C Minimum cut-off is essential!
       Npoints = 5000
       !vFeFe
@@ -139,111 +156,6 @@ C Minimum cut-off is essential!
         fp2 = work(i+2)
         call abcd(fm1,f0,fp1,fp2,dr2,a,b,cc,d)
         write(10,*)a,b,cc,d
-      enddo
-      close(10)
-      !vNiNi
-      open(unit=10,file='iapp_ReRe.dat')
-      rmin = 0.01d0
-      rmax = 5.4604375d0
-      r2min = rmin**2
-      r2max = rmax**2
-      dr2 = (r2max-r2min)/dble(Npoints)
-      do i=1,Npoints+1
-        r2 = r2min + dr2*dble(i-1)
-        rc = dsqrt(r2)
-        work(i) = vpair(rc,2,2)
-      enddo
-      write(10,*)rmax,r2max,r2min,1.d0/dr2,Npoints+1
-      do i=1,Npoints+1
-        r2 = r2min + dr2*dble(i-1)
-        if (i.ne.1                         ) fm1 = work(i-1)
-        if (i.ne.Npoints+1                 ) fp1 = work(i+1)
-        if (i.ne.Npoints+1.and.i.ne.Npoints) fp2 = work(i+2)
-        if (i.eq.1                         ) fm1 = 2.d0*work(1)-work(2)
-        if (i.eq.Npoints+1                 ) fp1 = 0.d0
-        if (i.eq.Npoints+1                 ) fp2 = 0.d0
-        if (i.eq.Npoints                   ) fp2 = work(Npoints)
-
-        f0  =  work(i)
-        call abcd(fm1,f0,fp1,fp2,dr2,a,b,cc,d)
-        write(10,*)a,b,cc,d,r2
-      enddo
-      close(10)
-      !phiCu
-      open(unit=10,file='iapn_Re.dat')
-      rmin = 0.01d0
-      rmax = 5.4604375d0
-      r2min = rmin**2
-      r2max = rmax**2
-      dr2 = (r2max-r2min)/dble(Npoints)
-      do i=1,Npoints+1
-        r2 = r2min + dr2*dble(i-1)
-        rc = dsqrt(r2)
-        work(i) = elepot(rc,2)
-      enddo
-      write(10,*)rmax,r2max,r2min,1.d0/dr2,Npoints+1
-      do i=1,Npoints+1
-        r2 = r2min + dr2*dble(i-1)
-        if (i.ne.1                         ) fm1 = work(i-1)
-        if (i.ne.Npoints+1                 ) fp1 = work(i+1)
-        if (i.ne.Npoints+1.and.i.ne.Npoints) fp2 = work(i+2)
-        if (i.eq.1                         ) fm1 = 2.d0*work(1)-work(2)
-        if (i.eq.Npoints+1                 ) fp1 = 0.d0
-        if (i.eq.Npoints+1                 ) fp2 = 0.d0
-        if (i.eq.Npoints                   ) fp2 = work(Npoints)
-
-        f0  =  work(i)
-        call abcd(fm1,f0,fp1,fp2,dr2,a,b,cc,d)
-        write(10,*)a,b,cc,d,r2
-      enddo
-      close(10)
-      !efeNi
-      open(unit=10,file='iape_Re.dat')
-      rmin = 0.d0
-      rmax = 10.d0
-      dr2 = (rmax-rmin)/dble(Npoints)
-      do i=1,Npoints+3
-        r2 = rmin + dr2*dble(i-1)
-        work(i) = demb(r2,2)
-      enddo
-      write(10,*)rmax,dr2,Npoints+1
-      do i=1,Npoints+1
-        if (i.ne.1) fm1 = work(i-1)
-        if (i.eq.1) fm1 = 2.d0*work(1)-work(2)
-
-        f0  = work(i)
-        fp1 = work(i+1)
-        fp2 = work(i+2)
-        call abcd(fm1,f0,fp1,fp2,dr2,a,b,cc,d)
-        write(10,*)a,b,cc,d
-      enddo
-      close(10)
-      !vFeNi
-      open(unit=10,file='iapp_WRe.dat')
-      rmin = 0.01d0
-      rmax = 5.4604375d0
-      r2min = rmin**2
-      r2max = rmax**2
-      dr2 = (r2max-r2min)/dble(Npoints)
-      do i=1,Npoints+1
-        r2 = r2min + dr2*dble(i-1)
-        rc = dsqrt(r2)
-        work(i) = vpair(rc,1,2)
-      enddo
-      write(10,*)rmax,r2max,r2min,1.d0/dr2,Npoints+1
-      do i=1,Npoints+1
-        r2 = r2min + dr2*dble(i-1)
-        if (i.ne.1                         ) fm1 = work(i-1)
-        if (i.ne.Npoints+1                 ) fp1 = work(i+1)
-        if (i.ne.Npoints+1.and.i.ne.Npoints) fp2 = work(i+2)
-        if (i.eq.1                         ) fm1 = 2.d0*work(1)-work(2)
-        if (i.eq.Npoints+1                 ) fp1 = 0.d0
-        if (i.eq.Npoints+1                 ) fp2 = 0.d0
-        if (i.eq.Npoints                   ) fp2 = work(Npoints)
-
-        f0  =  work(i)
-        call abcd(fm1,f0,fp1,fp2,dr2,a,b,cc,d)
-        write(10,*)a,b,cc,d,r2
       enddo
       close(10)
       write(*,*)'***Tables format Osetsky generated***'
@@ -575,9 +487,9 @@ C
      $       -0.163131143161660d1*(5.401695d0-r)**3*H(5.401695d0-r)
      $       +0.138409896486177d1*(5.4604375d0-r)**3*H(5.4604375d0-r)
         call fdens(dens,r,1)
-        !print *, 'epair1', r, epair, epair*r
+        print *, 'epair1', r, epair, epair*r
         epair = epair - 2.d0*1.848055990d0*dens/2.232322602d-1
-        !print *, 'epair2', r, epair, epair*r
+        print *, 'epair2', r, epair, epair*r
         return
       endif
       if(r.le.r1) then
@@ -621,270 +533,6 @@ C
      $        (1.d0-connect(r,r1,r2,0))*fun2
         return
       endif
-      elseif( (it1.eq.2).and.(it2.eq.2) ) then ! Re-Re
-      rb=0.529177210818181818d0
-      r2 = 2.d0
-      r1 = 1.d0
-      Z = 75.d0
-      if(r.ge.r2) then ! Cubic spline part
-        epair = 0.d0
-        if(r.ge.5.46d0) return
-        epair = 6.726805309d+00*(2.7d0-r)**3*H(2.7d0-r)
-     $        + 3.217593889d+00*(3.252d0-r)**3*H(3.252d0-r)
-     $        - 6.545857587d-01*(3.804d0-r)**3*H(3.804d0-r)
-     $        + 1.453229484d-01*(4.356d0-r)**3*H(4.356d0-r)
-     $        - 2.063629464d-01*(4.908d0-r)**3*H(4.908d0-r)
-     $        + 6.114909116d-02*(5.46d0-r)**3*H(5.46d0-r)
-        return
-      endif
-      if(r.le.r1) then
-        epair = 0.d0
-        rs = 0.88534d0*rb/((2.d0**0.5d0)*(Z**(1.d0/3.d0)))
-        x = r/rs
-        qe_sq = 14.3992d0  ! *0.99834058980680 ![eV*A] charge of electron
-        if(r.eq.0.d0)return
-        epair = Z**2*qe_sq/r * ( 0.1818d0*dexp(-3.2d0*x)
-     $                    +0.5099d0*dexp(-0.9423d0*x)
-     $                    +0.2802d0*dexp(-0.4029d0*x)
-     $                    +0.02817d0*dexp(-0.2016d0*x) )
-        return
-      endif
-      if((r.lt.r2).and.(r.gt.r1))then
-        rs = 0.88534d0*rb/((2.d0**0.5d0)*(Z**(1.d0/3.d0)))
-        x = r/rs
-        qe_sq = 14.3992d0  ! *0.99834058980680 ![eV*A] charge of electron
-        fun1 = Z**2*qe_sq/r * ( 0.1818d0*dexp(-3.2d0*x)
-     $                    +0.5099d0*dexp(-0.9423d0*x)
-     $                    +0.2802d0*dexp(-0.4029d0*x)
-     $                    +0.02817d0*dexp(-0.2016d0*x) )
-        fun2 = 6.726805309d+00*(2.7d0-r)**3*H(2.7d0-r)
-     $        + 3.217593889d+00*(3.252d0-r)**3*H(3.252d0-r)
-     $        - 6.545857587d-01*(3.804d0-r)**3*H(3.804d0-r)
-     $        + 1.453229484d-01*(4.356d0-r)**3*H(4.356d0-r)
-     $        - 2.063629464d-01*(4.908d0-r)**3*H(4.908d0-r)
-     $        + 6.114909116d-02*(5.46d0-r)**3*H(5.46d0-r)
-        epair = connect(r,r1,r2,0)*fun1 +
-     $        (1.d0-connect(r,r1,r2,0))*fun2
-        return
-      endif
-      elseif( (it1.eq.3).and.(it2.eq.3) ) then ! Cr-Cr
-        rb=0.529177210818181818d0
-        r2 = 0.8d0 !0.71d0
-        r1 = 0.3d0
-        Z = 24.d0
-      if(r.ge.r2) then ! Cubic spline part
-        epair = 0.d0
-        if(r.ge.5.1d0) return
-        epair = 3.12852453d0*(2.5d0-r)**3*H(2.5d0-r)
-     $          +0.427388187d0*(2.93333333d0-r)**3*H(2.93333333d0-r)
-     $          +0.0895592353d0*(3.36666667d0-r)**3*H(3.36666667d0-r)
-     $          +0.544690445d0*(3.8d0-r)**3*H(3.8d0-r)
-     $          -0.571035515d0*(4.23333333d0-r)**3*H(4.23333333d0-r)
-     $          +0.307710921d0*(4.66666667d0-r)**3*H(4.66666667d0-r)
-     $          +1000.d0*(2.25d0-r)**3*H(2.25d0-r)
-     $          -1030.d0*(2.2d0-r)**3*H(2.2d0-r)
-     $          +20000.d0*(0.8d0-r)**3*H(0.8d0-r)
-     $          -9.72495128d-2*(5.1d0-r)**3*H(5.1d0-r) ! Density correction
-        return
-      endif
-      if(r.le.r1) then
-        epair = 0.d0
-        rs = 0.88534d0*rb/((2.d0**0.5d0)*(Z**(1.d0/3.d0)))
-        x = r/rs
-        qe_sq = 14.3992d0  ! *0.99834058980680 ![eV*A] charge of electron
-        if(r.eq.0.d0)return
-        epair = Z**2*qe_sq/r * ( 0.1818d0*dexp(-3.2d0*x)
-     $                    +0.5099d0*dexp(-0.9423d0*x)
-     $                    +0.2802d0*dexp(-0.4029d0*x)
-     $                    +0.02817d0*dexp(-0.2016d0*x) )
-        return
-      endif
-      if((r.lt.r2).and.(r.gt.r1))then
-        rs = 0.88534d0*rb/((2.d0**0.5d0)*(Z**(1.d0/3.d0)))
-        x = r/rs
-        qe_sq = 14.3992d0  ! *0.99834058980680 ![eV*A] charge of electron
-        fun1 = Z**2*qe_sq/r * ( 0.1818d0*dexp(-3.2d0*x)
-     $                    +0.5099d0*dexp(-0.9423d0*x)
-     $                    +0.2802d0*dexp(-0.4029d0*x)
-     $                    +0.02817d0*dexp(-0.2016d0*x) )
-        fun2 = 3.12852453d0*(2.5d0-r)**3*H(2.5d0-r)
-     $          +0.427388187d0*(2.93333333d0-r)**3*H(2.93333333d0-r)
-     $          +0.0895592353d0*(3.36666667d0-r)**3*H(3.36666667d0-r)
-     $          +0.544690445d0*(3.8d0-r)**3*H(3.8d0-r)
-     $          -0.571035515d0*(4.23333333d0-r)**3*H(4.23333333d0-r)
-     $          +0.307710921d0*(4.66666667d0-r)**3*H(4.66666667d0-r)
-     $          +1000.d0*(2.25d0-r)**3*H(2.25d0-r)
-     $          -1030.d0*(2.2d0-r)**3*H(2.2d0-r)
-     $          +20000.d0*(0.8d0-r)**3*H(0.8d0-r)
-     $          -9.72495128d-2*(5.1d0-r)**3*H(5.1d0-r) ! Density correction
-        epair = connect(r,r1,r2,0)*fun1 +
-     $        (1.d0-connect(r,r1,r2,0))*fun2
-        return
-      endif
-      elseif( ((it1.eq.1).and.(it2.eq.2))
-     $   .OR. ((it1.eq.2).and.(it2.eq.1)) ) then ! W-Re
-        rb=0.529177210818181818d0
-        r2 = 2.d0
-        r1 = 1.d0
-        Z1 = 74.d0
-        Z2 = 75.d0
-      if(r.ge.r2) then ! Cubic spline part
-        epair = 0.d0
-        if(r.ge.4.2d0) return
-        epair = - 2.335000000d+01*(2.65d0-r)**3*H(2.65d0-r)
-     $          + 2.456959229d+01*(2.7d0-r)**3*H(2.7d0-r)
-     $          - 2.585878138d+00*(3.075d0-r)**3*H(3.075d0-r)
-     $          + 3.457586051d+00*(3.45d0-r)**3*H(3.45d0-r)
-     $          - 7.013105493d-01*(3.825d0-r)**3*H(3.825d0-r)
-     $          - 2.513324003d-01*(4.2d0-r)**3*H(4.2d0-r)
-        return
-      endif
-      if(r.le.r1) then
-        epair = 0.d0
-        rs = 0.88534d0*rb/(Z1**(2.d0/3.d0)+Z2**(2.d0/3.d0))**0.5d0
-        x = r/rs
-        qe_sq = 14.3992d0  ! *0.99834058980680 ![eV*A] charge of electron
-        if(r.eq.0.d0)return
-        epair = Z1*Z2*qe_sq/r * ( 0.1818d0*dexp(-3.2d0*x)
-     $                    +0.5099d0*dexp(-0.9423d0*x)
-     $                    +0.2802d0*dexp(-0.4029d0*x)
-     $                    +0.02817d0*dexp(-0.2016d0*x) )
-        return
-      endif
-      if((r.lt.r2).and.(r.gt.r1))then
-        rs = 0.88534d0*rb/(Z1**(2.d0/3.d0)+Z2**(2.d0/3.d0))**0.5d0
-        x = r/rs
-        qe_sq = 14.3992d0  ! *0.99834058980680 ![eV*A] charge of electron
-        fun1 = Z1*Z2*qe_sq/r * ( 0.1818d0*dexp(-3.2d0*x)
-     $                    +0.5099d0*dexp(-0.9423d0*x)
-     $                    +0.2802d0*dexp(-0.4029d0*x)
-     $                    +0.02817d0*dexp(-0.2016d0*x) )
-        fun2 = - 2.335000000d+01*(2.65d0-r)**3*H(2.65d0-r)
-     $          + 2.456959229d+01*(2.7d0-r)**3*H(2.7d0-r)
-     $          - 2.585878138d+00*(3.075d0-r)**3*H(3.075d0-r)
-     $          + 3.457586051d+00*(3.45d0-r)**3*H(3.45d0-r)
-     $          - 7.013105493d-01*(3.825d0-r)**3*H(3.825d0-r)
-     $          - 2.513324003d-01*(4.2d0-r)**3*H(4.2d0-r)
-        epair = connect(r,r1,r2,0)*fun1 +
-     $        (1.d0-connect(r,r1,r2,0))*fun2
-        return
-      endif
-      elseif( ((it1.eq.1).and.(it2.eq.3))
-     $   .OR. ((it1.eq.3).and.(it2.eq.1)) ) then ! Fe-Cr
-        rb=0.529177210818181818d0
-        r2 = 2.1d0
-        r1 = 1.1d0
-        Z1 = 26.d0
-        Z2 = 24.d0
-      if(r.ge.r2) then ! Cubic spline part
-        epair = 0.d0
-        if(r.gt.4.1d0) return
-        epair = !67.6541494d0*(1.5d0-r)**3*H(1.5d0-r)
-     $          -50.d0*(2.3d0-r)**3*H(2.3d0-r) ! To soften ZBL fit
-     $          +8.23435097d0*(2.61428571d0-r)**3*H(2.61428571d0-r)
-     $          -0.280740148d0*(2.98571429d0-r)**3*H(2.98571429d0-r)
-     $          -0.995297604d0*(3.35714286d0-r)**3*H(3.35714286d0-r)
-     $          +1.30667939d0*(3.72857143d0-r)**3*H(3.72857143d0-r)
-     $          -0.485688767d0*(4.1d0-r)**3*H(4.1d0-r)
-     $          +30.d0*(2.5d0-r)**3*H(2.5d0-r)
-        return
-      endif
-      if(r.le.r1) then
-        epair = 0.d0
-        rs = 0.88534d0*rb/(Z1**(2.d0/3.d0)+Z2**(2.d0/3.d0))**0.5d0
-        x = r/rs
-        qe_sq = 14.3992d0  ! *0.99834058980680 ![eV*A] charge of electron
-        if(r.eq.0.d0)return
-        epair = Z1*Z2*qe_sq/r * ( 0.1818d0*dexp(-3.2d0*x)
-     $                    +0.5099d0*dexp(-0.9423d0*x)
-     $                    +0.2802d0*dexp(-0.4029d0*x)
-     $                    +0.02817d0*dexp(-0.2016d0*x) )
-        return
-      endif
-      if((r.lt.r2).and.(r.gt.r1))then
-        rs = 0.88534d0*rb/(Z1**(2.d0/3.d0)+Z2**(2.d0/3.d0))**0.5d0
-        x = r/rs
-        qe_sq = 14.3992d0  ! *0.99834058980680 ![eV*A] charge of electron
-        fun1 = Z1*Z2*qe_sq/r * ( 0.1818d0*dexp(-3.2d0*x)
-     $                    +0.5099d0*dexp(-0.9423d0*x)
-     $                    +0.2802d0*dexp(-0.4029d0*x)
-     $                    +0.02817d0*dexp(-0.2016d0*x) )
-        fun2 = !67.6541494d0*(1.5d0-r)**3*H(1.5d0-r)
-     $          -50.d0*(2.3d0-r)**3*H(2.3d0-r) ! To soften ZBL fit
-     $          +8.23435097d0*(2.61428571d0-r)**3*H(2.61428571d0-r)
-     $          -0.280740148d0*(2.98571429d0-r)**3*H(2.98571429d0-r)
-     $          -0.995297604d0*(3.35714286d0-r)**3*H(3.35714286d0-r)
-     $          +1.30667939d0*(3.72857143d0-r)**3*H(3.72857143d0-r)
-     $          -0.485688767d0*(4.1d0-r)**3*H(4.1d0-r)
-     $          +30.d0*(2.5d0-r)**3*H(2.5d0-r)
-        epair = connect(r,r1,r2,0)*fun1 +
-     $        (1.d0-connect(r,r1,r2,0))*fun2
-        return
-      endif
-      elseif( ((it1.eq.2).and.(it2.eq.3))
-     $   .OR. ((it1.eq.3).and.(it2.eq.2)) ) then ! Ni-Cr
-        rb=0.529177210818181818d0
-        r2 = 2.1d0 !1.4d0
-        r1 = 1.1d0 !1.d0
-        Z1 = 28.d0
-        Z2 = 24.d0
-      if(r.ge.r2) then ! Cubic spline part
-        epair = 0.d0
-        if(r.gt.4.1d0) return
-        epair = ! irrelevant 58.3099655d0*(1.5d0-r)**3*H(1.5d0-r)
-     $          -180.d0*(2.1d0-r)**3*H(2.1d0-r) ! To soften ZBL fit
-     $          +180.d0*(1.8d0-r)**3*H(1.8d0-r) ! To soften ZBL fit
-     $          +142.394996d0*(2.28d0-r)**3*H(2.28d0-r)
-     $          +1.20715276d0*(2.54d0-r)**3*H(2.54d0-r)
-     $          -1.7907013d0*(2.8d0-r)**3*H(2.8d0-r)
-     $          +2.23129554d0*(3.06d0-r)**3*H(3.06d0-r)
-     $          +0.3375609d0*(3.32d0-r)**3*H(3.32d0-r)
-     $          -2.55371442d0*(3.58d0-r)**3*H(3.58d0-r)
-     $          +2.73113015d0*(3.84d0-r)**3*H(3.84d0-r)
-     $          -0.987225106d0*(4.1d0-r)**3*H(4.1d0-r)
-     $          +11.d0*(2.5d0-r)**3*H(2.5d0-r)
-     $          -38.d0*(2.4d0-r)**3*H(2.4d0-r)
-        return
-      endif
-      if(r.le.r1) then
-        epair = 0.d0
-        rs = 0.88534d0*rb/(Z1**(2.d0/3.d0)+Z2**(2.d0/3.d0))**0.5d0
-        x = r/rs
-        qe_sq = 14.3992d0  ! *0.99834058980680 ![eV*A] charge of electron
-      if(r.eq.0.d0)return
-        epair = Z1*Z2*qe_sq/r * ( 0.1818d0*dexp(-3.2d0*x)
-     $                    +0.5099d0*dexp(-0.9423d0*x)
-     $                    +0.2802d0*dexp(-0.4029d0*x)
-     $                    +0.02817d0*dexp(-0.2016d0*x) )
-        return
-      endif
-      if((r.lt.r2).and.(r.gt.r1))then
-        rs = 0.88534d0*rb/(Z1**(2.d0/3.d0)+Z2**(2.d0/3.d0))**0.5d0
-        x = r/rs
-        qe_sq = 14.3992d0  ! *0.99834058980680 ![eV*A] charge of electron
-        fun1 = Z1*Z2*qe_sq/r * ( 0.1818d0*dexp(-3.2d0*x)
-     $                    +0.5099d0*dexp(-0.9423d0*x)
-     $                    +0.2802d0*dexp(-0.4029d0*x)
-     $                    +0.02817d0*dexp(-0.2016d0*x) )
-        fun2 = !irrelevant 58.3099655d0*(1.5d0-r)**3*H(1.5d0-r)
-     $          -180.d0*(2.1d0-r)**3*H(2.1d0-r) ! To soften ZBL fit
-     $          +180.d0*(1.8d0-r)**3*H(1.8d0-r) ! To soften ZBL fit
-     $          +142.394996d0*(2.28d0-r)**3*H(2.28d0-r)
-     $          +1.20715276d0*(2.54d0-r)**3*H(2.54d0-r)
-     $          -1.7907013d0*(2.8d0-r)**3*H(2.8d0-r)
-     $          +2.23129554d0*(3.06d0-r)**3*H(3.06d0-r)
-     $          +0.3375609d0*(3.32d0-r)**3*H(3.32d0-r)
-     $          -2.55371442d0*(3.58d0-r)**3*H(3.58d0-r)
-     $          +2.73113015d0*(3.84d0-r)**3*H(3.84d0-r)
-     $          -0.987225106d0*(4.1d0-r)**3*H(4.1d0-r)
-     $          +11.d0*(2.5d0-r)**3*H(2.5d0-r)
-     $          -38.d0*(2.4d0-r)**3*H(2.4d0-r)
-        epair = connect(r,r1,r2,0)*fun1 +
-     $        (1.d0-connect(r,r1,r2,0))*fun2
-        return
-      endif
-      else
-      stop '***SPECIES UNDEFINED***'
       endif
       
       return
@@ -920,33 +568,6 @@ C
      $       +0.344164178842340d-1*(4.9d0-r)**3*H(4.9d0-r)
         dens = dens * S
         return
-      elseif(it.eq.2) then ! Re
-        ! No constant value necessary; mex is about 0.6
-        dens = 0.d0
-        if(r.ge.5.46d0) return
-        dens = 3.704045964d-03*(5.46d0-r)**3
-        return
-      elseif(it.eq.3) then ! Cr
-      r1 = 0.3d0
-      r2 = 0.8d0
-      if(r.ge.r2)then
-        if(r.ge.5.1d0) return
-        dens = 0.00407776648d0*(5.1d0-r)**3
-      endif
-      if(r.le.r1) then
-        dens = 0.00407776648d0*(5.1d0-r1)**3
-        return
-      endif
-      if( (r.gt.r1).and.(r.lt.r2) ) then
-        fun1 = 0.00407776648d0*(5.1d0-r1)**3
-        fun2 = 0.00407776648d0*(5.1d0-r)**3
-        dens = connect(r,r1,r2,0)*fun1+
-     $        (1.d0-connect(r,r1,r2,0))*fun2
-        return
-      endif
-
-      else
-      stop '***SPECIES UNDEFINED***'
       endif
       
       return
