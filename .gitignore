@@ -1,6 +1,8 @@
 /data
-/documents
+/docs
 /sim
 /oldsort
 .DS_Store
 /notebooks/.ipynb_checkpoints
+__pycache__/
+*.pyc
