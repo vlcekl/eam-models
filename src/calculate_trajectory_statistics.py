@@ -43,14 +43,14 @@ name_in = 'all_samples'
 working = '../data/working'
 trjfile = 'trj_' + name_in + '.pickle'
 
-name = 'bsf_samples'
+name = 'bs_force_samples'
 
 # read dict with trajectories information
 with open(os.path.join(working, trjfile), 'rb') as fi:
     trj_fit = pickle.load(fi, encoding='latin1')
 
 # select for which atoms we calculate forces
-force_atoms = {key:[] for key in trj_fit.keys()}
+force_atoms = {key:[0] for key in trj_fit.keys()}
 
 force_atoms['relax'] = [0, 1]
 force_atoms['bcc_npt_langevin_3700K'] = [0, 1]
@@ -73,14 +73,17 @@ for key, trj in trj_fit.items():
     print('dataset #', key)
     sys.stdout.flush()
 
+    fatoms = force_atoms[key]
+
     # target data
     target_dict = {'type':'trajectory'}
     target_dict['weight']= weights[key]
     target_dict['box'] = trj['box']
     target_dict['xyz'] = trj['xyz']
     target_dict['energy'] = trj['energy']
-    target_dict['forces'] = force_targ(trj['forces'])
+    target_dict['forces'] = force_targ(trj['forces'], fatoms)
     target_dict['temp'] = trj['temp']
+    target_dict['fatoms'] = fatoms
 
     # save inverse temperature data (if T=0, set beta=1/300)
     target_dict['beta'] = np.empty_like(target_dict['temp'])
