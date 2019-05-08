@@ -82,7 +82,7 @@ C Minimum cut-off is essential!
       ! edens
       open(unit=10,file='iapn_W.dat')
       rmin = 0.01d0
-      rmax = 5.65d0
+      rmax = 4.95d0
       r2min = rmin**2
       r2max = rmax**2
       dr2 = (r2max-r2min)/dble(Npoints)
